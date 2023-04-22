@@ -1,0 +1,92 @@
+{
+    "Continent":{
+        "EUROPE": {
+            "United Kingdom": ["uk", 200878],
+            "Albania": ["al", 3609],
+            "Andorra": ["ad", 3123],
+            "Austria": ["at", 58238], 
+            "Belgium": ["be", 102148], 
+            "Bosnia and Herzegovina": ["ba", 8467], 
+            "Bulgaria": ["bg", 66569], 
+            "Croatia": ["hr", 31799], 
+            "Cyprus": ["cy", 3149], 
+            "Czech Republic": ["cz", 78246], 
+            "Denmark": ["dk", 21981], 
+            "Finland": ["fi", 35294], 
+            "France": ["fr", 350508], 
+            "Germany": ["de", 355086], 
+            "Greece": ["gr", 27189], 
+            "Hungary": ["hu", 346807], 
+            "Ireland": ["ie", 6758], 
+            "Italy": ["it", 199495], 
+            "Liechtenstein": ["li", 2052], 
+            "Luxembourg": ["lu", 14941], 
+            "Malta": ["mt", 1950], 
+            "Monaco": ["mc", 12904], 
+            "Montenegro": ["me", 30726], 
+            "Netherlands": ["nl", 119666], 
+            "North Macedonia": ["mk", 5965], 
+            "Norway": ["no", 43818], 
+            "Poland": ["pl", 392710], 
+            "Portugal": ["pt", 14314], 
+            "Romania": ["ro", 69228], 
+            "San Marino": ["sm", 2283], 
+            "Serbia": ["rs", 124530], 
+            "Slovakia": ["sk", 53927], 
+            "Slovenia": ["si", 15424],
+            "Spain": ["es", 245814],
+            "Sweden": ["se", 29111],
+            "Switzerland": ["ch", 96129]
+        },
+        "EX-USSR": {
+            "Armenia": ["am", 47456],
+            "Azerbaijan": ["az", 15886],
+            "Belarus": ["by", 532102],
+            "Estonia": ["ee", 56077],
+            "Georgia": ["ge", 42071],
+            "Kazakhstan": ["kz", 314348],
+            "Kyrgyzstan": ["kg", 35620],
+            "Latvia": ["lv", 107633],
+            "Lithuania": ["lt", 130715],
+            "Moldova": ["md", 33949],
+            "Russia": ["ru", 12312829],
+            "Tajikistan": ["tj", 3396],
+            "USSR": ["su", 452508],
+            "Ukraine": ["ua", 1750163],
+            "Uzbekistan": ["uz", 27135]
+        },
+        "ASIA": {
+            "China": ["cn", 18622],
+            "Hong Kong": ["hk", 4244],
+            "Indonesia": ["id", 4308],
+            "Israel": ["il", 64909],
+            "Japan": ["jp", 21842],
+            "Malaysia": ["my", 963],
+            "Mongolia": ["mn", 3647],
+            "Palestinian Authority": ["ps", 2782],
+            "Saudi Arabia": ["sa", 1180],
+            "Singapore": ["sg", 2501],
+            "South Korea": ["kr", 2792],
+            "Thailand": ["th", 10503],
+            "Turkey": ["tr", 109018],
+            "UAE": ["ae", 24511],
+            "Vietnam": ["vn", 7201]
+        }, 
+        "NORTH AMERICA": {
+            "Canada": ["ca", 17842],
+            "Mexico": ["mx", 3205],
+            "USA": ["us", 198677]
+        }, 
+        "AFRICA": {
+            "Egypt": ["eg", 17683],
+            "Morocco": ["ma", 4155]
+        },
+        "AUSTRALIA AND OCEANIA": {
+            "New Zealand": ["nz", 4176]
+        }, 
+        "SOUTH AMERICA": {
+            "Brazil": ["br", 2068]
+        },
+        "Non-recognized and partially recognized states": ["xx", 46288]
+    }
+}
