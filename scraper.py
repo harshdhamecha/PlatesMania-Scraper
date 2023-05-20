@@ -7,6 +7,7 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
+import pyperclip
 
 
 
@@ -58,6 +59,7 @@ def save_image(seconds, filename):
         time.sleep(seconds)
         pt.hotkey('Ctrl', 's')
         time.sleep(seconds)
+        pyperclip.copy(filename)
         pt.write(filename, interval=seconds)
         time.sleep(seconds)
         pt.press('enter')
