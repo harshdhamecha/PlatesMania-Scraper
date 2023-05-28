@@ -1,3 +1,12 @@
+'''
+ 	@author 	 harsh-dhamecha
+ 	@email       harshdhamecha10@gmail.com
+ 	@create date 2023-05-20 08:37:21
+ 	@modify date 2023-05-26 19:34:51
+ 	@desc        A script to scrape license plates data from platesmania.com
+ '''
+
+
 from selenium import webdriver
 import json
 import os
@@ -5,76 +14,127 @@ import argparse
 import pyautogui as pt
 import time
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.service import Service
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import pyperclip
 
 
 
-DRIVER_PATH = r'C:\Users\Asus\Downloads\geckodriver-v0.33.0-win32\geckodriver.exe'
-BASE_URL = r'https://platesmania.com/'
-DOWNLOAD_DIR = r'E:\Projects\Self\LPR_Data_Scraping\data'
+class PlatesManiaScraper():
 
-options = Options()
-options.binary_location = r''
-options.set_preference('browser.download.folderList', 2)
-options.set_preference('browser.download.dir', DOWNLOAD_DIR)
-driver = webdriver.Firefox(service=Service(DRIVER_PATH), options=options)
-driver.maximize_window()
+    def __init__(self, args):
 
-
-def get_mappings(json_file, key):
-    with open(json_file, 'r') as f:
-        data = json.load(f)
-    return data[key]
-
-
-def get_vehicle_info(driver, url):
-
-    driver.get(url)
-
-    vehicle_imgs = driver.find_elements(By.CSS_SELECTOR, 'img.img-responsive.center-block')
-    plate_imgs = driver.find_elements(By.CSS_SELECTOR, 'img.img-responsive.center-block.margin-bottom-10')
-    vehicle_models = driver.find_elements(By.CSS_SELECTOR, 'h4.text-center')
-
-    vehicle_srcs = [img.get_attribute('src') for img in vehicle_imgs if '/m/' in img.get_attribute('src')]
-
-    plate_texts = []
-    vehicle_srcs_new = []
-    model_names = []
-
-    for i, img in enumerate(plate_imgs):
-        plate_text = img.get_attribute('alt')
-        if plate_text:
-            plate_texts.append(plate_text)
-            vehicle_srcs_new.append(vehicle_srcs[i].replace('/m/', '/o/'))
-            model_names.append(vehicle_models[i].text)
-    
-    return vehicle_srcs_new, plate_texts, model_names
+        self.driver = webdriver.Chrome(service=Service(executable_path=args.driver_path))
+        self.base_url = args.base_url
+        self.countries_code_file = args.countries_code
+        self.key = args.key
+        self.short_wait = args.short_wait
+        self.long_wait = args.long_wait
+        self.start_idx = args.start_idx
+        self.end_idx = args.end_idx
+        self.country = args.country
+        self.country_code = self.get_mappings()
+        self.last_page = ''
+        self.save_dir = args.save_dir
 
 
-def save_image(seconds, filename):
+    def exception_handler(func):
 
-    try:
-        time.sleep(seconds)
-        pt.hotkey('Ctrl', 's')
-        time.sleep(seconds)
-        pyperclip.copy(filename)
-        pt.write(filename, interval=seconds)
-        time.sleep(seconds)
+        def inner_function(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                print(f'FAILED - {e}')
+
+        return inner_function
+
+
+    @property
+    @exception_handler
+    def url_sep(self):
+        return '' if len(self.last_page) == 0 else '-'
+
+
+    @property
+    @exception_handler
+    def url(self):
+        return f'{self.base_url}/{self.country_code}/gallery{self.url_sep}{self.last_page}'
+
+
+    @exception_handler
+    def get_mappings(self):
+
+        with open(self.countries_code_file) as f:
+            data = json.load(f)[self.key]
+        return data[self.country]
+
+
+    @exception_handler
+    def get_img_srcs(self):
+        
+        vehicle_imgs = WebDriverWait(self.driver, self.long_wait)\
+            .until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'img.img-responsive.center-block')))
+        return [img.get_attribute('src').replace('/m/', '/o/') for img in vehicle_imgs if '/m/' in img.get_attribute('src')]
+
+
+    @exception_handler
+    def get_plate_texts(self):
+        plate_imgs = WebDriverWait(self.driver, self.long_wait)\
+            .until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'img.img-responsive.center-block.margin-bottom-10')))
+        return [img.get_attribute('alt') for img in plate_imgs]
+
+
+    @exception_handler
+    def save_image(self, path):
+
+        time.sleep(self.short_wait)
+        pt.hotkey('ctrl', 's')
+        time.sleep(self.short_wait)
+        pyperclip.copy(path)
+        time.sleep(self.short_wait)
+        pt.hotkey('ctrl', 'v')
+        time.sleep(self.short_wait)
         pt.press('enter')
-        time.sleep(seconds)
+        time.sleep(self.short_wait)
+        
+
+    @exception_handler
+    def scrape(self):
+        
+        for page in range(self.start_idx, self.end_idx):
             
-    except Exception as e:
-        print(f'FAILED - {e}')
+            self.driver.get(self.url)
+
+            img_srcs = self.get_img_srcs()
+            plate_texts = self.get_plate_texts()
+
+            for i, img_src in enumerate(img_srcs):
+                plate_text = plate_texts[i].replace(' ', '-')
+                img_name = f'{plate_text}.jpg'
+                path = os.path.join(self.save_dir, img_name)
+
+                self.driver.get(img_src)
+
+                self.save_image(path)
+
+            self.last_page = str(page)
 
 
 def parse_args():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--file', type=str, help='json file containing country and their code mappings')
-    parser.add_argument('--key', type=str, default='Continent', help='key to be searched inside a json file')
-    parser.add_argument('--save-dir', type=str, default=DOWNLOAD_DIR, help='downloaded images save directory')
+    parser.add_argument('--driver-path', default='./chromedriver.exe', type=str, help='webdriver path')
+    parser.add_argument('--country', default='UAE', type=str, help='country name whose license plates to be scraped')
+    parser.add_argument('--countries-code', default='./countries.json', type=str, help='json file containing country and their code mappings')
+    parser.add_argument('--key', type=str, default='Country', help='key to be searched inside a json file')
+    parser.add_argument('--save-dir', type=str, default='E:\Projects\Self\LPR_Data_Scraping\data2', help='downloaded images save directory')
+    parser.add_argument('--base-url', type=str, default='https://platesmania.com', help='base url from which to scrape')
+    parser.add_argument('--start-idx', type=int, default=1, help='page from which to start scraping')
+    parser.add_argument('--end-idx', type=int, default=100, help='page at which to end scraping')
+    parser.add_argument('--short-wait', type=int, default=0.3, help='shorter wait for webdriver')
+    parser.add_argument('--long-wait', type=int, default=5, help='longer wait for webdriver')
     args = parser.parse_args()
     
     return args
@@ -82,73 +142,9 @@ def parse_args():
 
 def main(args):
 
-    vehicles_visited_srcs = []
-    sep = '__'
-    seconds = 0.1
-    counts = {}
-    countries = ['Egypt', 'Turkey', 'Iran', 'Iraq', 'Saudi Arabia', 'Yemen', 'Syria', 'Jordan', 'UAE', 'Israel', \
-                 'Lebanon', 'Palestinian Authority', 'Oman', 'Kuwait', 'Qatar', 'Bahrain']
-                 
-    visited_countries = ['Israel', 'Saudi Arabia', 'Palestinian Authority', 'Turkey', 'UAE']
-
-    data = get_mappings(args.file, args.key)
-
-    for continent, country_details in data.items():
-
-        for country, details in country_details.items():
-                
-            if country in countries and country not in visited_countries:
-
-                print(f'Downloading images for {country}...')
-
-                country_code, total_imgs = details
-                country_url = BASE_URL + country_code + '/gallery'
-                n_pages = total_imgs // 10
-
-                for page in range(1, n_pages):
-                    
-                    url = country_url if page == 1 else country_url + '-' + str(page)
-
-                    vehicle_srcs, plate_texts, model_names = get_vehicle_info(driver, url)
-                    
-                    for i, vehicle_src in enumerate(vehicle_srcs):
-
-                        if vehicle_src not in vehicles_visited_srcs:
-
-                            plate_text = plate_texts[i]
-                            model_name = model_names[i]
-                            img_name = country + sep + model_name + sep + plate_text
-                            img_name = img_name.replace('/', '')
-
-                            counts[img_name] = counts.get(img_name, 0) + 1
-                            img_name += sep + str(counts[img_name])
-                            
-                            time.sleep(seconds)
-                            driver.execute_script("window.open('');")
-                            driver.switch_to.window(driver.window_handles[1])
-                            driver.get(vehicle_src)
-                    
-                            save_image(seconds=seconds, filename=img_name)
-
-                            vehicles_visited_srcs.append(vehicle_src)
-                            
-                            driver.close()
-                            driver.switch_to.window(driver.window_handles[0])
-                            driver.back()
-
-                            time.sleep(seconds)
-
-                        else:
-                            print('Image already exists... Moving to the next URL')
-
-        country_imgs = [img for img in os.listdir(args.save_dir) if img.startswith(country)]
-        print(f'Total {len(country_imgs)} images downloaded for {country}...')
-
-    driver.close()
-    
-    total_downloaded_imgs = len(os.listdir(args.save_dir))
-
-    print(f'Total {total_downloaded_imgs} images downloaded and saved to {args.save_dir}...')
+    os.makedirs(args.save_dir, exist_ok=True)
+    scraper = PlatesManiaScraper(args)
+    scraper.scrape()
 
 
 if __name__ == "__main__":
