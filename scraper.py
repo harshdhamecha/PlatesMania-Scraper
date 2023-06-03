@@ -2,7 +2,7 @@
  	@author 	 harsh-dhamecha
  	@email       harshdhamecha10@gmail.com
  	@create date 2023-05-20 08:37:21
- 	@modify date 2023-06-03 14:01:51
+ 	@modify date 2023-06-03 14:14:04
  	@desc        A script to scrape license plates data from platesmania.com
  '''
 
@@ -175,7 +175,7 @@ class PlatesManiaScraper():
 
                     self.driver.get(img_src)
 
-                    self.save_image(path)
+                    if not os.path.exists(path): self.save_image(path)
 
             self.last_page = str(page)
 
