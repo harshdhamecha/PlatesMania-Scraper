@@ -2,7 +2,7 @@
  	@author 	 harsh-dhamecha
  	@email       harshdhamecha10@gmail.com
  	@create date 2023-05-20 08:37:21
- 	@modify date 2023-05-26 19:34:51
+ 	@modify date 2023-06-03 12:17:39
  	@desc        A script to scrape license plates data from platesmania.com
  '''
 
@@ -38,6 +38,8 @@ class PlatesManiaScraper():
         self.country_code = self.get_mappings()
         self.last_page = ''
         self.save_dir = args.save_dir
+        self.sep = args.sep
+        self.count = {}
 
 
     def exception_handler(func):
@@ -68,7 +70,7 @@ class PlatesManiaScraper():
 
         with open(self.countries_code_file) as f:
             data = json.load(f)[self.key]
-        return data[self.country]
+        return data[self.country] if self.country in data else ''
 
 
     @exception_handler
@@ -81,6 +83,7 @@ class PlatesManiaScraper():
 
     @exception_handler
     def get_plate_texts(self):
+
         plate_imgs = WebDriverWait(self.driver, self.long_wait)\
             .until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'img.img-responsive.center-block.margin-bottom-10')))
         return [img.get_attribute('alt') for img in plate_imgs]
@@ -111,8 +114,12 @@ class PlatesManiaScraper():
             plate_texts = self.get_plate_texts()
 
             for i, img_src in enumerate(img_srcs):
+                
                 plate_text = plate_texts[i].replace(' ', '-')
-                img_name = f'{plate_text}.jpg'
+                count = str(self.count.get(plate_text, 0) + 1)
+                self.count[plate_text] += 1
+                
+                img_name = f'{self.sep}'.join([self.country, plate_text, count]) + '.jpg'
                 path = os.path.join(self.save_dir, img_name)
 
                 self.driver.get(img_src)
@@ -135,6 +142,7 @@ def parse_args():
     parser.add_argument('--end-idx', type=int, default=100, help='page at which to end scraping')
     parser.add_argument('--short-wait', type=int, default=0.3, help='shorter wait for webdriver')
     parser.add_argument('--long-wait', type=int, default=5, help='longer wait for webdriver')
+    parser.add_argument('--sep', type=str, default='_', help='separator for img-name')
     args = parser.parse_args()
     
     return args
