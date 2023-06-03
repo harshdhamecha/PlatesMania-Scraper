@@ -13,5 +13,5 @@ conda create --name scrape --file requirements.txt
 conda activate scrape
 
 # Run scraper
-python scraper.py --save-dir ./ 
+python scraper.py --save-dir ./data 
 ```
