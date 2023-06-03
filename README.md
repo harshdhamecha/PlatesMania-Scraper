@@ -1,5 +1,5 @@
 # PlatesMania-Scraper
-A repository to scrape License Plates Data from (platesmania.com)[https://platesmania.com/].   
+A repository to scrape License Plates Data from [platesmania.com](https://platesmania.com/).   
 
 ## Install
 
