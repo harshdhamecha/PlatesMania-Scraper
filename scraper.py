@@ -2,7 +2,7 @@
  	@author 	 harsh-dhamecha
  	@email       harshdhamecha10@gmail.com
  	@create date 2023-05-20 08:37:21
- 	@modify date 2023-06-03 12:17:39
+ 	@modify date 2023-06-03 12:24:56
  	@desc        A script to scrape license plates data from platesmania.com
  '''
 
@@ -105,6 +105,8 @@ class PlatesManiaScraper():
 
     @exception_handler
     def scrape(self):
+
+        os.makedirs(self.save_dir, exist_ok=True)
         
         for page in range(self.start_idx, self.end_idx):
             
@@ -136,7 +138,7 @@ def parse_args():
     parser.add_argument('--country', default='UAE', type=str, help='country name whose license plates to be scraped')
     parser.add_argument('--countries-code', default='./countries.json', type=str, help='json file containing country and their code mappings')
     parser.add_argument('--key', type=str, default='Country', help='key to be searched inside a json file')
-    parser.add_argument('--save-dir', type=str, default='E:\Projects\Self\LPR_Data_Scraping\data2', help='downloaded images save directory')
+    parser.add_argument('--save-dir', type=str, help='downloaded images save directory')
     parser.add_argument('--base-url', type=str, default='https://platesmania.com', help='base url from which to scrape')
     parser.add_argument('--start-idx', type=int, default=1, help='page from which to start scraping')
     parser.add_argument('--end-idx', type=int, default=100, help='page at which to end scraping')
@@ -150,7 +152,6 @@ def parse_args():
 
 def main(args):
 
-    os.makedirs(args.save_dir, exist_ok=True)
     scraper = PlatesManiaScraper(args)
     scraper.scrape()
 
