@@ -23,7 +23,7 @@ A repository to scrape License Plates Data from [platesmania.com](https://plates
 
 ```
 # Run scraper
-python scraper.py --save-dir ./data --country UAE 
+python scraper.py --save-dir ./data --country 'UAE' 
 ```
 
 Image name will be as `[country]-[plate-text]-[count].jpg`
